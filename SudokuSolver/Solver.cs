@@ -63,5 +63,26 @@ namespace SudokuSolver
             return grille;
         }
 
+
+        /**
+     * Determine si la caseCourante est dans la meme ligne, colonne ou carré que la case Selectionnée
+     * @param caseSelec :  case de référence
+     * @param caseCourante : case à tester
+     * @return vrai si la case est voisine, faux sinon
+     */
+        private Boolean estVoisin(Tuple<int, int> caseSelec, Tuple<int, int> caseCourante)
+        {
+            int ligne = caseCourante.Item1;
+            int col = caseCourante.Item2;
+
+            // trouver les coordonnées du carré auquel la case selectionnée appartient
+            int ligneDebutCarre = caseSelec.Item1 / 3 * 3;
+            int colDebutCarre = caseSelec.Item2 / 3 * 3;
+
+            return (!((ligne == caseSelec.Item1) && (col == caseSelec.Item2)) &&
+                    ((ligne == caseSelec.Item1) || (col == caseSelec.Item2) ||
+                    (ligne >= ligneDebutCarre && ligne <= ligneDebutCarre + 2 && col >= colDebutCarre && col <= colDebutCarre + 2)));
+        }
+
     }
 }
