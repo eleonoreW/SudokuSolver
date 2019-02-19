@@ -39,8 +39,10 @@ namespace SudokuSolver
                         valeursPossibles.Add(sudoku.GetGrille()[i, j]); // La seule valeur possible est la valeur imposée
                     }
                     cspDepart[coord] = valeursPossibles;
+
                 }
             }
+
         }
 
         public static int[,] cspToGrille(Dictionary<Tuple<int, int>, List<int>> csp, int taille)
@@ -79,6 +81,7 @@ namespace SudokuSolver
                 else
                 {
                     Dictionary<Tuple<int, int>, List<int>> cspResultat = backtracking_search();
+
                     return Solver.cspToGrille(cspResultat, taille);
                 }
             }
@@ -304,16 +307,17 @@ namespace SudokuSolver
             domaineMaj.Add(valeur);
             cspModif[caseSelec] = domaineMaj;
 
-            foreach (KeyValuePair<Tuple<int, int>, List<int>> caseSudoku in cspModif)
+            List<Tuple<int, int>> keys = new List<Tuple<int, int>>(cspModif.Keys);
+            foreach (Tuple<int, int> caseSudokuKey in keys)
             {
-                Tuple<int, int> caseCourante = caseSudoku.Key;
+                Tuple<int, int> caseCourante = caseSudokuKey;
 
-                if ((!caseSudoku.Value.Contains(valeur)) || (caseCourante.Item1 == caseSelec.Item1 && caseCourante.Item2 == caseSelec.Item2))
+                if ((!cspModif[caseSudokuKey].Contains(valeur)) || (caseCourante.Item1 == caseSelec.Item1 && caseCourante.Item2 == caseSelec.Item2))
                     continue;
 
                 if (estVoisin(caseSelec, caseCourante))
                 {
-                    domaineMaj = caseSudoku.Value;
+                    domaineMaj = cspModif[caseSudokuKey];
                     domaineMaj.Remove((int)valeur);
                     cspModif[caseCourante] = domaineMaj;
                     if (domaineMaj.Count == 1)
