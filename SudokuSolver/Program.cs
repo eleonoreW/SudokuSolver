@@ -17,14 +17,31 @@ namespace SudokuSolver
 			int[,] grid = new int[gridSize, gridSize];
 
 			// Remplissage de la grille à partir des donnees
-			for (int i = 0; i < gridSize; i++) {
-				// Donnees de la grille dans les lignes suivantes
-				string[] data = inputLines[i + 1].Split(',');
-				int j = 0;
-				foreach (string value in data) {
-					grid[i, j] = int.Parse(value);
-					j++;
+			int dataLinesLength = inputLines.Length - 1;
+			if (dataLinesLength == gridSize) {
+				for (int i = 0; i < gridSize; i++) {
+					// Donnees de la grille dans les lignes suivantes
+					string[] data = inputLines[i + 1].Split(',');
+					if (data.Length == gridSize) {
+						int j = 0;
+						foreach (string value in data) {
+							grid[i, j] = int.Parse(value);
+							j++;
+						}
+					} else {
+						// Nb colones != taille
+						Console.WriteLine("Nombre de donnees en colonnes (" + data.Length + ") different de la taille de la grille (" + gridSize + ") \n");
+						Console.WriteLine("Appuyer sur une touche pour quitter ..." + "\n");
+						Console.ReadKey();
+						return;
+					}
 				}
+			} else {
+				// Nb lignes != taille
+				Console.WriteLine("Nombre de donnees en lignes (" + dataLinesLength + ") different de la taille de la grille (" + gridSize + ") \n");
+				Console.WriteLine("Appuyer sur une touche pour quitter ..." + "\n");
+				Console.ReadKey();
+				return;
 			}
 
 			Sudoku sudoku = new Sudoku(gridSize);
@@ -49,6 +66,7 @@ namespace SudokuSolver
 			Console.WriteLine(Sudoku.GrilleToString(Solver.cspToGrille(solveur.cspDepart, solveur.taille), solveur.taille) + "\n");
 			Console.WriteLine(Sudoku.GrilleToString(solveur.solve(), solveur.taille) + "\n");
 
+			Console.WriteLine("Appuyer sur une touche pour quitter ..." + "\n");
 			Console.ReadKey();
 		}
 	}
