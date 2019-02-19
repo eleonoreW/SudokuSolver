@@ -23,7 +23,10 @@ namespace SudokuSolver
             Solver solveur = new Solver(sudoku);
             Console.WriteLine(Sudoku.GrilleToString(Solver.cspToGrille(solveur.cspDepart, solveur.taille), solveur.taille) + "\n");
             Console.WriteLine(Sudoku.GrilleToString(sudoku.GetGrille(), sudoku.GetTaille()) + "\n");
-            while (true) { }
+            solveur.solve();
+
+
+            Console.ReadKey();
 
         }
 

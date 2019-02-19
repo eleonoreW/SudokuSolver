@@ -98,7 +98,7 @@ namespace SudokuSolver
         }
 
         /**
-        * Recherche de la solution avec la technide du backtracking
+        * Recherche de la solution avec la technique du backtracking
         * @param csp : CSP a étudier
         * @return null si echec / CSP mis à jour si réussite
         */
@@ -113,20 +113,16 @@ namespace SudokuSolver
             Tuple<int, int> caseSelec = select_unassigned_variable(csp);
 
             Dictionary<Tuple<int, int>, List<int>> newCSP;
-            for (int valeur : order_domain_values(csp, caseSelec))
+            foreach (int valeur in order_domain_values(csp, caseSelec))
             {
                 // Si la valeur respecte les contraintes pour cette case
-                if (csp.get(caseSelec).contains(valeur))
+                if (csp[caseSelec].Contains(valeur))
                 {
-
                     Dictionary<Tuple<int, int>, List<int>> mapTest = copieCSP(csp);
                     Dictionary<Tuple<int, int>, List<int>> saveMap = copieCSP(csp);
                     // modifie le domaine sur toutes les cases concernées
                     // test inference
-
-                    bool valide = consistent(mapTest, caseSelec, valeur);
-
-                    if (valide)
+                    if (consistent(mapTest, caseSelec, valeur))
                     {
                         newCSP = recursive_backtracking(mapTest);
                         if (newCSP != null)
@@ -136,20 +132,16 @@ namespace SudokuSolver
                     }
                     // récupère l'ancienne carte si les tests ont échouées
                     csp = saveMap;
-                    if (csp.get(caseSelec).size() == 1)
+                    if (csp[caseSelec].Count == 1)
                     {
                         return null;//si c'etait la seule valeur possible et qu'elle est pas possible
                     }
                     else
                     {
-                        csp.get(caseSelec).remove((int)valeur);
+                        csp[caseSelec].Remove((int)valeur);
                     }
-
-
-
                 }
             }
-
             return null;
         }
 
@@ -160,24 +152,23 @@ namespace SudokuSolver
         */
         private Tuple<int, int> select_unassigned_variable(Dictionary<Tuple<int, int>, List<int>> csp)
         {
-
             // choix de la case a traiter avec le domaine le plus petit qui soit superieur à 1 (si a 1 c'est qu'on a deja trouvé la bonne valeur)
-            int minDomaine = 10; // on initialise le domaine a la valeur maximale
-            List<Tuple<int, int>> casesSelectionnees = new List<Tuple<int, int>>();    // Il peut y avoir plusieurs cases Selectionnée si elles ont un domaine de taille égale, degree heuristic se chargera de choisir le meilleur
-            for (Map.Entry<Tuple<int, int>, List<int>> caseSudoku : csp.entrySet())
+            int minDomaine = taille + 1; // on initialise le domaine a la valeur maximale
+            List<Tuple<int, int>> casesSelectionnees = new List<Tuple<int, int>>();    // Il peut y avoir plusieurs cases selectionnée si elles ont un domaine de taille égale, degree heuristic se chargera de choisir le meilleur
+            foreach (KeyValuePair<Tuple<int, int>,List<int>> caseSudoku in csp)
             {
-                List<int> valeursPossibles = caseSudoku.getValue();
+                List<int> valeursPossibles = caseSudoku.Value;
                 if (valeursPossibles.Count > 1 && valeursPossibles.Count <= minDomaine)
                 {
                     if (valeursPossibles.Count < minDomaine)
                     {
                         casesSelectionnees.Clear(); // on vide le tableau
                         minDomaine = valeursPossibles.Count;
-                        casesSelectionnees.Add(caseSudoku.getKey());
+                        casesSelectionnees.Add(caseSudoku.Key);
                     }
                     else
                     { // minDomaine == valeursPossibles.size();
-                        casesSelectionnees.Add(caseSudoku.getKey());
+                        casesSelectionnees.Add(caseSudoku.Key);
                     }
                 }
             }
@@ -186,28 +177,27 @@ namespace SudokuSolver
         }
 
         /**
-        * Determine laquelle des valeur selectionner en fonction du nombre de contrainte voisinnes en utilisant Degree heuristic (on retourne celle qui a le plus de contraintes(cases voisines avec degré1)
+        * Determine laquelle des valeurs selectionnee en fonction du nombre de contrainte voisinnes en utilisant Degree heuristic (on retourne celle qui a le plus de contraintes(cases voisines avec degré 1)
         * @param csp : CSP courant
         * @param casesSelectionnees : tableau des cases retenues par MRV
         * @return meilleure case
         */
-        private Tuple<int, int> degree_heuristic(Dictionary<Tuple<int, int>, List<int>> csp, ArrayList<Tuple<int, int>> casesSelectionnees)
+        private Tuple<int, int> degree_heuristic(Dictionary<Tuple<int, int>, List<int>> csp, List<Tuple<int, int>> casesSelectionnees)
         {
 
-            if (casesSelectionnees.size() == 1)
-                return casesSelectionnees.get(0);
-
-
+            if (casesSelectionnees.Count == 1)
+                return casesSelectionnees[0];
+            
             int degreMax = 0;
             int degre;
             Tuple<int, int> caseDegreMax = null;
-            for (Tuple<int, int> caseSelec : casesSelectionnees)
+            foreach (Tuple<int, int> caseSelec in casesSelectionnees)
             {
                 degre = 0;
-                for (Tuple<int, int> caseSudoku : csp.keySet())
+                foreach (Tuple<int, int> caseSudoku in csp.Keys)
                 {
                     // si c'est une case voisine ET que cette case n'est pas assignée (= taille tableau contrainte > 1)
-                    if (estVoisin(caseSelec, caseSudoku) && casesSelectionnees.size() > 1)
+                    if (estVoisin(caseSelec, caseSudoku) && casesSelectionnees.Count > 1)
                         degre++;
                 }
 
@@ -231,38 +221,32 @@ namespace SudokuSolver
         private List<int> order_domain_values(Dictionary<Tuple<int, int>, List<int>> csp, Tuple<int, int> caseSelec)
         {
             // si il n'y a qu'une seule valeur dans le tableau retourne cette valeur
-            if (csp.get(caseSelec).size() == 1)
-                return csp.get(caseSelec);
+            if (csp[caseSelec].Count == 1)
+                return csp[caseSelec];
 
-            HashMap<int, int> nbContraintesParValeur = new HashMap<>();
+            Dictionary<int, int> nbContraintesParValeur = new Dictionary<int, int>();
             int compteurContraintes;
             // pour chaque valeur du domaine pour var
-            for (int valeur : csp.get(caseSelec))
+            foreach (int valeur in csp[caseSelec])
             {
                 compteurContraintes = 0;
                 // regarde le nombre de conflits avec les voisins pour cette valeur
-                for (Map.Entry<Tuple<int, int>, ArrayList<int>> caseSudoku : csp.entrySet())
+                foreach (KeyValuePair<Tuple<int, int>, List<int>> caseSudoku in csp)
                 {
-                    if (estVoisin(caseSelec, caseSudoku.getKey()))
+                    if (estVoisin(caseSelec, caseSudoku.Key))
                     {
-                        if (caseSudoku.getValue().size() > 1 && caseSudoku.getValue().contains(valeur))
+                        if (caseSudoku.Value.Count > 1 && caseSudoku.Value.Contains(valeur))
                             compteurContraintes++;
                     }
                 }
-                nbContraintesParValeur.put(valeur, compteurContraintes);
+                nbContraintesParValeur.Add(valeur, compteurContraintes);
             }
-
-
-            // On trie la csp par ordre croissant de contraintes domaine par valeur
-            HashMap<int, int> mapTrieParNbContrainte = nbContraintesParValeur.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2)->e1, LinkedHashMap::new));
-
             List<int> valeursSelec = new List<int>();
-
-            for (Map.Entry<int, int> contrainteDeValeur : mapTrieParNbContrainte.entrySet())
-                valeursSelec.add(contrainteDeValeur.getKey());
+            // On trie la csp par ordre croissant de contraintes domaine par valeur
+            foreach (KeyValuePair<int, int> contrainteDeValeur in nbContraintesParValeur.OrderBy(i => i.Value))
+            {
+                valeursSelec.Add(contrainteDeValeur.Key);
+            }
             return valeursSelec;
         }
 
@@ -273,16 +257,16 @@ namespace SudokuSolver
         */
         private Dictionary<Tuple<int, int>, List<int>> copieCSP(Dictionary<Tuple<int, int>, List<int>> csp)
         {
-            Dictionary<Tuple<int, int>, List<int>> copie = new HashMap<>();
+            Dictionary<Tuple<int, int>, List<int>> copie = new Dictionary<Tuple<int, int>, List<int>>();
 
-            for (Map.Entry<Tuple<int, int>, ArrayList<int>> caseSudoku : csp.entrySet())
+            foreach (KeyValuePair<Tuple<int, int>, List<int>> caseSudoku in csp)
             {
-                ArrayList<int> copieContraintes = new ArrayList<>();
-                for (int val : caseSudoku.getValue())
+                List<int> copieContraintes = new List<int>();
+                foreach (int val in caseSudoku.Value)
                 {
-                    copieContraintes.add(val);
+                    copieContraintes.Add(val);
                 }
-                copie.put(new Tuple<int, int>(caseSudoku.getKey().getKey(), caseSudoku.getKey().getValue()), copieContraintes);
+                copie.Add(new Tuple<int, int>(caseSudoku.Key.Item1, caseSudoku.Key.Item2), copieContraintes);
             }
             return copie;
         }
@@ -297,48 +281,48 @@ namespace SudokuSolver
             // POUR CHAQUE cases du sudoku
             // SI il n'existe qu'une seule valeur possible pour chaque cases alors c'est valide
             // SINON invalide
-            ArrayList<int> valeursPossibles;
-            for (Map.Entry<Tuple<int, int>, ArrayList<int>> caseSudoku : csp.entrySet())
+            List<int> valeursPossibles;
+            foreach (KeyValuePair<Tuple<int, int>, List<int>> caseSudoku in csp)
             {
-                valeursPossibles = caseSudoku.getValue();
-                if (valeursPossibles.size() != 1) return false;
+                valeursPossibles = caseSudoku.Value;
+                if (valeursPossibles.Count != 1) return false;
             }
             return true;
         }
 
         /**
-        * Determine si l'affectation est envisageable si on ne réduit le domaine d'un voisin à 0
+        * Determine si l'affectation est envisageable et si on ne réduit pasle domaine d'un voisin à 0
         * @param cspModif : CSP courant
         * @param caseSelec : case courante
         * @param valeur : valeur testée
         * @return vrai si la valeur peut être affectée, faux sinon
         */
-        private boolean consistent(Dictionary<Tuple<int, int>, List<int>> cspModif, Tuple<int, int> caseSelec, int valeur)
+        private Boolean consistent(Dictionary<Tuple<int, int>, List<int>> cspModif, Tuple<int, int> caseSelec, int valeur)
         {
 
             List<int> domaineMaj = new List<int>();
             domaineMaj.Add(valeur);
             cspModif.Add(caseSelec, domaineMaj);
 
-            for (Map.Entry<Tuple<int, int>, ArrayList<int>> caseSudoku : cspModif.entrySet())
+            foreach (KeyValuePair<Tuple<int, int>, List<int>> caseSudoku in cspModif)
             {
-                Tuple<int, int> caseCourante = caseSudoku.getKey();
+                Tuple<int, int> caseCourante = caseSudoku.Key;
 
-                if ((!caseSudoku.getValue().contains(valeur)) || (caseCourante.getKey() == caseSelec.getKey() && caseCourante.getValue() == caseSelec.getValue()))
+                if ((!caseSudoku.Value.Contains(valeur)) || (caseCourante.Item1 == caseSelec.Item1 && caseCourante.Item2 == caseSelec.Item2))
                     continue;
 
                 if (estVoisin(caseSelec, caseCourante))
                 {
 
-                    domaineMaj = caseSudoku.getValue();
-                    domaineMaj.remove((int)valeur);
-                    cspModif.put(caseCourante, domaineMaj);
-                    if (domaineMaj.size() == 1)
+                    domaineMaj = caseSudoku.Value;
+                    domaineMaj.Remove((int)valeur);
+                    cspModif.Add(caseCourante, domaineMaj);
+                    if (domaineMaj.Count == 1)
                     {
-                        if (!consistent(cspModif, caseCourante, domaineMaj.get(0)))
+                        if (!consistent(cspModif, caseCourante, domaineMaj[0]))
                             return false;
                     }
-                    else if (domaineMaj.size() == 0)
+                    else if (domaineMaj.Count == 0)
                     {
                         return false;
                     }
@@ -358,12 +342,12 @@ namespace SudokuSolver
             // Liste d'arcs Case X / Case Y
             LinkedList<Tuple<Tuple<int, int>, Tuple<int, int>>> queue = new LinkedList<Tuple<Tuple<int, int>, Tuple<int, int>>>();
 
-            for (Tuple<int, int> X : csp.keySet())
+            foreach (Tuple<int, int> X in csp.Keys)
             {
-                for (Tuple<int, int> Y : csp.keySet())
+                foreach (Tuple<int, int> Y in csp.Keys)
                     if (estVoisin(X, Y))
                     {
-                        queue.AddLast(new Tuple<int, int>(X, Y));
+                        queue.AddLast(new Tuple<Tuple<int, int>, Tuple<int, int>>(X, Y));
                     }
             }
             Tuple<Tuple<int, int>, Tuple<int, int>> arc;
@@ -373,15 +357,15 @@ namespace SudokuSolver
                 queue.RemoveFirst();
                 if (remove_inconsistent_values(csp, arc))
                 {
-                    if (csp.get(arc.getKey()).size() == 0)
+                    if (csp[arc.Item1].Count == 0)
                         return false;
                     else
                     {
-                        for (Tuple<int, int> voisin : csp.keySet())
+                        foreach (Tuple<int, int> voisin in csp.Keys)
                         {
-                            if (estVoisin(arc.getKey(), voisin))
+                            if (estVoisin(arc.Item1, voisin))
                             {
-                                queue.AddFirst(new Tuple<int, int>(arc.getKey(), voisin));
+                                queue.AddFirst(new Tuple<Tuple<int,int>, Tuple<int, int>>(arc.Item1, voisin));
                             }
                         }
                     }
@@ -399,20 +383,20 @@ namespace SudokuSolver
         private bool remove_inconsistent_values(Dictionary<Tuple<int, int>, List<int>> csp, Tuple<Tuple<int, int>, Tuple<int, int>> arc)
         {
             bool effacer = false;
-            List<int> valeursX = csp.get(arc.Item1);
-            List<int> valeursY = csp.get(arc.Item2);
+            List<int> valeursX = csp[arc.Item1];
+            List<int> valeursY = csp[arc.Item2];
 
             // si l'un des noeud a deja une valeur assignée efface cette valeur du domaine de celui non assigné
 
             if (valeursX.Count == 1 && valeursY.Count != 1 && valeursY.Contains(valeursX.ElementAt(0)))
             {
-                valeursY.remove((int)valeursX.get(0));
+                valeursY.Remove((int)valeursX[0]);
                 csp.Add(arc.Item2, valeursY);
                 effacer = true;
             }
-            if (valeursY.Count == 1 && valeursX..Count != 1 && valeursX.Contains(valeursY.ElementAt(0)))
+            if (valeursY.Count == 1 && valeursX.Count != 1 && valeursX.Contains(valeursY.ElementAt(0)))
             {
-                valeursX.remove((int)valeursY.get(0));
+                valeursX.Remove((int)valeursY[0]);
                 csp.Add(arc.Item1, valeursX);
                 effacer = true;
             }
