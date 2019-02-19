@@ -38,7 +38,7 @@ namespace SudokuSolver
                     {
                         valeursPossibles.Add(sudoku.GetGrille()[i, j]); // La seule valeur possible est la valeur imposée
                     }
-                    cspDepart.Add(coord, valeursPossibles);
+                    cspDepart[coord] = valeursPossibles;
                 }
             }
         }
@@ -239,7 +239,7 @@ namespace SudokuSolver
                             compteurContraintes++;
                     }
                 }
-                nbContraintesParValeur.Add(valeur, compteurContraintes);
+                nbContraintesParValeur[valeur] = compteurContraintes;
             }
             List<int> valeursSelec = new List<int>();
             // On trie la csp par ordre croissant de contraintes domaine par valeur
@@ -266,7 +266,7 @@ namespace SudokuSolver
                 {
                     copieContraintes.Add(val);
                 }
-                copie.Add(new Tuple<int, int>(caseSudoku.Key.Item1, caseSudoku.Key.Item2), copieContraintes);
+                copie[new Tuple<int, int>(caseSudoku.Key.Item1, caseSudoku.Key.Item2)] = copieContraintes;
             }
             return copie;
         }
@@ -302,7 +302,7 @@ namespace SudokuSolver
 
             List<int> domaineMaj = new List<int>();
             domaineMaj.Add(valeur);
-            cspModif.Add(caseSelec, domaineMaj);
+            cspModif[caseSelec] = domaineMaj;
 
             foreach (KeyValuePair<Tuple<int, int>, List<int>> caseSudoku in cspModif)
             {
@@ -313,10 +313,9 @@ namespace SudokuSolver
 
                 if (estVoisin(caseSelec, caseCourante))
                 {
-
                     domaineMaj = caseSudoku.Value;
                     domaineMaj.Remove((int)valeur);
-                    cspModif.Add(caseCourante, domaineMaj);
+                    cspModif[caseCourante] = domaineMaj;
                     if (domaineMaj.Count == 1)
                     {
                         if (!consistent(cspModif, caseCourante, domaineMaj[0]))
@@ -391,13 +390,13 @@ namespace SudokuSolver
             if (valeursX.Count == 1 && valeursY.Count != 1 && valeursY.Contains(valeursX.ElementAt(0)))
             {
                 valeursY.Remove((int)valeursX[0]);
-                csp.Add(arc.Item2, valeursY);
+                csp[arc.Item2] = valeursY;
                 effacer = true;
             }
             if (valeursY.Count == 1 && valeursX.Count != 1 && valeursX.Contains(valeursY.ElementAt(0)))
             {
                 valeursX.Remove((int)valeursY[0]);
-                csp.Add(arc.Item1, valeursX);
+                csp[arc.Item1] = valeursX;
                 effacer = true;
             }
 
