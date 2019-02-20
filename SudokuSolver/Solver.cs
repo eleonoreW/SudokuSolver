@@ -377,13 +377,20 @@ namespace SudokuSolver
 			int ligne = caseCourante.Item1;
 			int col = caseCourante.Item2;
 
-			// trouver les coordonnées du carré auquel la case selectionnée appartient
-			int ligneDebutCarre = caseSelec.Item1 / 3 * 3;
-			int colDebutCarre = caseSelec.Item2 / 3 * 3;
+            if(Math.Sqrt(taille)%1 ==0 ){
+                // trouver les coordonnées du carré auquel la case selectionnée appartient
+			    int ligneDebutCarre = caseSelec.Item1 / (int) Math.Sqrt(taille);
+			    int colDebutCarre = caseSelec.Item2 / (int) Math.Sqrt(taille);
 
-			return (!((ligne == caseSelec.Item1) && (col == caseSelec.Item2)) &&
-			((ligne == caseSelec.Item1) || (col == caseSelec.Item2) ||
-			(ligne >= ligneDebutCarre && ligne <= ligneDebutCarre + 2 && col >= colDebutCarre && col <= colDebutCarre + 2)));
+			    return (!((ligne == caseSelec.Item1) && (col == caseSelec.Item2)) &&
+			    ((ligne == caseSelec.Item1) || (col == caseSelec.Item2) ||
+			    (ligne >= ligneDebutCarre && ligne <= ligneDebutCarre + 2 && col >= colDebutCarre && col <= colDebutCarre + 2)));
+            }
+            else
+            {
+                return false;
+            }
+			
 		}
 	}
 }

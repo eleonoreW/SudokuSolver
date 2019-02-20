@@ -6,7 +6,7 @@ namespace SudokuSolver
 	class Sudoku
 	{
 		private int tailleGrille;
-		private int[,] grille = new int[9, 9];
+		private int[,] grille;
 
 		public Sudoku(int taille)
 		{
