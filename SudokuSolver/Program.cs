@@ -63,7 +63,7 @@ namespace SudokuSolver
 			// ---
 
 			Solver solveur = new Solver(sudoku);
-			Console.WriteLine(Sudoku.GrilleToString(Solver.cspToGrille(solveur.cspDepart, solveur.taille), solveur.taille) + "\n");
+			Console.WriteLine(Sudoku.GrilleToString(Solver.CspToGrille(solveur.cspDepart, solveur.taille), solveur.taille) + "\n");
 			Console.WriteLine(Sudoku.GrilleToString(solveur.solve(), solveur.taille) + "\n");
 
 			Console.WriteLine("Appuyer sur une touche pour quitter ..." + "\n");
