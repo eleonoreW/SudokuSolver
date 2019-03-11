@@ -9,7 +9,8 @@ namespace SudokuSolver
 		static void Main(string[] args)
 		{
 			// Recuperation des lignes du fichier d'entree
-			string[] inputLines = File.ReadAllLines("../../Input.txt"); // Chemin temporaire pour debug => bin\Debug\Input.txt
+			string[] inputLines = File.ReadAllLines("../../Input.txt"); // Chemin temporaire pour debug => | bin\Debug\SudokuSolver.exe
+																		//                                 | Input.txt
 
 			// Taille de la grille à la ligne 0
 			int gridSize = int.Parse(inputLines[0]);
@@ -31,43 +32,33 @@ namespace SudokuSolver
 					} else {
 						// Nb colones != taille
 						Console.WriteLine("Nombre de donnees en colonnes (" + data.Length + ") different de la taille de la grille (" + gridSize + ") \n");
-						Console.WriteLine("Appuyer sur une touche pour quitter ..." + "\n");
-						Console.ReadKey();
+						End();
 						return;
 					}
 				}
 			} else {
 				// Nb lignes != taille
 				Console.WriteLine("Nombre de donnees en lignes (" + dataLinesLength + ") different de la taille de la grille (" + gridSize + ") \n");
-				Console.WriteLine("Appuyer sur une touche pour quitter ..." + "\n");
-				Console.ReadKey();
+				End();
 				return;
 			}
 
 			Sudoku sudoku = new Sudoku(gridSize);
-			sudoku.SetGrille(grid);
+			sudoku.grid = grid;
 
-			// OLD ---
-			//int tailleSudoku = 9;
-			//Sudoku sudoku = new Sudoku(tailleSudoku);
-			//sudoku.SetGrille(new int[,] {
-			//                            { 0 , 3 , 0 , 4 , 0 , 0 , 2 , 0 , 0 },
-			//                            { 1 , 0 , 0 , 8 , 2 , 6 , 0 , 0 , 9},
-			//                            { 0 , 0 , 0 , 7 , 0 , 9 , 0 , 0 , 0},
-			//                            { 4 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0},
-			//                            { 0 , 0 , 9 , 0 , 0 , 1 , 0 , 8 , 7},
-			//                            { 0 , 0 , 5 , 0 , 0 , 0 , 3 , 4 , 0},
-			//                            { 0 , 5 , 0 , 0 , 0 , 0 , 0 , 0 , 0},
-			//                            { 0 , 9 , 0 , 0 , 0 , 0 , 0 , 0 , 3},
-			//                            { 7 , 0 , 0 , 0 , 0 , 2 , 1 , 0 , 4 } });
-			// ---
 
 			Solver solveur = new Solver(sudoku);
-			Console.WriteLine(Sudoku.GrilleToString(Solver.CspToGrille(solveur.cspDepart, solveur.taille), solveur.taille) + "\n");
-			Console.WriteLine(Sudoku.GrilleToString(solveur.solve(), solveur.taille) + "\n");
+			Console.WriteLine(Sudoku.GridToString(Solver.CspToGrille(solveur.cspDepart, solveur.taille), solveur.taille) + "\n");
+			Console.WriteLine(Sudoku.GridToString(solveur.Solve(), solveur.taille) + "\n");
+			End();
 
-			Console.WriteLine("Appuyer sur une touche pour quitter ..." + "\n");
-			Console.ReadKey();
+
+			void End()
+			{
+				Console.WriteLine("Appuyer sur une touche pour quitter ..." + "\n");
+				Console.ReadKey();
+			}
+
 		}
 	}
 }

@@ -5,48 +5,28 @@ namespace SudokuSolver
 {
 	class Sudoku
 	{
-		private int tailleGrille;
-		private int[,] grille;
+		public readonly int gridSize;
+		public int[,] grid;
 
-		public Sudoku(int taille)
+		public Sudoku(int size)
 		{
-			tailleGrille = taille;
-			grille = new int[tailleGrille, tailleGrille];
+			gridSize = size;
+			grid = new int[gridSize, gridSize];
 
 		}
 
-		public static string GrilleToString(int[,] grid, int taille)
+		public static string GridToString(int[,] grid, int size)
 		{
-			String sudoku = "";
-			for (int i = 0; i < taille; i++) {
-				for (int j = 0; j < taille; j++) {
-					if (grid[i, j] == 0) {
-						sudoku = sudoku + " .";
-					} else {
-						sudoku = sudoku + " " + grid[i, j].ToString();
-					}
+			string sudoku = "";
+			for (int i = 0; i < size; i++) {
+				for (int j = 0; j < size; j++) {
+					sudoku = grid[i, j] == 0 ? sudoku + " ." : sudoku + " " + grid[i, j].ToString();
 				}
 				sudoku = sudoku + "\n";
 			}
 			return sudoku;
 		}
 
-		public int GetTaille()
-		{
-			return tailleGrille;
-		}
-
-		public int[,] GetGrille()
-		{
-			return grille;
-		}
-		public void SetGrille(int[,] g)
-		{
-			grille = g;
-		}
-
 	}
-
-
 
 }

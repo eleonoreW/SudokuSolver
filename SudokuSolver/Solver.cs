@@ -9,13 +9,14 @@ namespace SudokuSolver
 	{
 		public Dictionary<Tuple<int, int>, List<int>> cspDepart;
 		public int taille;
-		private int[] domaine;
+		private readonly int[] domaine;
 
 		public Solver(Sudoku sudoku)
 		{
-			taille = sudoku.GetTaille();
+			taille = sudoku.gridSize;
 			domaine = new int[taille];
 			cspDepart = new Dictionary<Tuple<int, int>, List<int>>();
+
 			// Domaine des solution pour n case
 			for (int i = 0; i < taille; i = i + 1) {
 				domaine[i] = i + 1;
@@ -26,38 +27,35 @@ namespace SudokuSolver
 				for (int j = 0; j < taille; j++) {
 					Tuple<int, int> coord = new Tuple<int, int>(i, j);
 					List<int> valeursPossibles = new List<int>();
-					if (sudoku.GetGrille()[i, j] == 0) {
+					if (sudoku.grid[i, j] == 0) {
 						valeursPossibles.AddRange(domaine); // Toute les valeurs du domaine sont possible dans cette case
 					} else {
-						valeursPossibles.Add(sudoku.GetGrille()[i, j]); // La seule valeur possible est la valeur imposée
+						valeursPossibles.Add(sudoku.grid[i, j]); // La seule valeur possible est la valeur imposée
 					}
 					cspDepart[coord] = valeursPossibles;
-
 				}
 			}
 
 		}
-        
+
+
 		public static int[,] CspToGrille(Dictionary<Tuple<int, int>, List<int>> csp, int taille)
 		{
 			int[,] grille = new int[taille, taille];
 			for (int i = 0; i < taille; i++) {
 				for (int j = 0; j < taille; j++) {
-					if (csp[Tuple.Create(i, j)].Count() > 1) {
-						grille[i, j] = 0;
-					} else {
-						grille[i, j] = csp[Tuple.Create(i, j)].First();
-					}
+					grille[i, j] = csp[Tuple.Create(i, j)].Count() > 1 ? 0 : csp[Tuple.Create(i, j)].First();
 				}
 			}
 			return grille;
 		}
-        
-        /// <summary>
-        /// Fonction à appeller pour résoudre un Sudoku
-        /// </summary>
-        /// <returns>La grille correspondant au Sudoku résolu ou null si le sudoku n'est pas résolvable.</returns>
-        public int[,] Solve()
+
+
+		/// <summary>
+		/// Fonction à appeller pour résoudre un Sudoku
+		/// </summary>
+		/// <returns>La grille correspondant au Sudoku résolu ou null si le sudoku n'est pas résolvable.</returns>
+		public int[,] Solve()
 		{
 			if (AC3(cspDepart)) {
 				if (EstValide(cspDepart)) {
@@ -71,28 +69,25 @@ namespace SudokuSolver
 				Console.WriteLine("Grille impossible à résoudre");
 				return null;
 			}
-        }
-        /// <summary>
-        /// Point d'entrée de la méthode récursive de backtracking.
-        /// </summary>
-        /// <returns> Le CSP final</returns>
-        private Dictionary<Tuple<int, int>, List<int>> Backtracking_search()
+		}
+
+
+		/// <summary>
+		/// Point d'entrée de la méthode récursive de backtracking.
+		/// </summary>
+		/// <returns> Le CSP final</returns>
+		private Dictionary<Tuple<int, int>, List<int>> Backtracking_search()
 		{
 			return Recursive_backtracking(cspDepart);
 		}
-        /**
-        * Recherche de la solution avec la technique du backtracking
-        * @param csp : CSP a étudier
-        * @return null si echec / CSP mis à jour si réussite
-        */
 
 
-        /// <summary>
-        /// Backtracking Search
-        /// </summary>
-        /// <param name="csp">CSP à évaluer</param>
-        /// <returns>Le CSP modifié si réussi, null sinon</returns>
-        private Dictionary<Tuple<int, int>, List<int>> Recursive_backtracking(Dictionary<Tuple<int, int>, List<int>> csp)
+		/// <summary>
+		/// Backtracking Search
+		/// </summary>
+		/// <param name="csp">CSP à évaluer</param>
+		/// <returns>Le CSP modifié si réussi, null sinon</returns>
+		private Dictionary<Tuple<int, int>, List<int>> Recursive_backtracking(Dictionary<Tuple<int, int>, List<int>> csp)
 		{
 			// si on a assigné toute les valeurs de la grille
 			if (EstValide(csp)) {
@@ -126,13 +121,14 @@ namespace SudokuSolver
 			}
 			return null;
 		}
-        
-        /// <summary>
-        /// On choisit la case pour laquelle on va déterminer la valeur. Pour chosiir la meilleure case possible on utilise MRV,Degree Heuristic (qui utilise Least Constraining value)
-        /// </summary>
-        /// <param name="csp">CSP Courant</param>
-        /// <returns>La case à laquelle on va attribuer une valeur</returns>
-        private Tuple<int, int> SelectUnassignedVariable(Dictionary<Tuple<int, int>, List<int>> csp)
+
+
+		/// <summary>
+		/// On choisit la case pour laquelle on va déterminer la valeur. Pour chosiir la meilleure case possible on utilise MRV,Degree Heuristic (qui utilise Least Constraining value)
+		/// </summary>
+		/// <param name="csp">CSP Courant</param>
+		/// <returns>La case à laquelle on va attribuer une valeur</returns>
+		private Tuple<int, int> SelectUnassignedVariable(Dictionary<Tuple<int, int>, List<int>> csp)
 		{
 			// choix de la case a traiter avec le domaine le plus petit qui soit superieur à 1 (si a 1 c'est qu'on a deja trouvé la bonne valeur)
 			int minDomaine = taille + 1; // on initialise le domaine a la valeur maximale
@@ -152,14 +148,15 @@ namespace SudokuSolver
 
 			return DegreeHeuristic(csp, casesSelectionnees);
 		}
-        
-        /// <summary>
-        /// Détermine laquelle des valeurs selectionnee en fonction du nombre de contrainte voisinnes en utilisant Degree heuristic (on retourne celle qui a le plus de contraintes(cases voisines avec degré 1)
-        /// </summary>
-        /// <param name="csp">CSP Courant</param>
-        /// <param name="casesSelectionnees">Tableau contenant les cases retenue après application de MRV</param>
-        /// <returns>La meilleure case possible</returns>
-        private Tuple<int, int> DegreeHeuristic(Dictionary<Tuple<int, int>, List<int>> csp, List<Tuple<int, int>> casesSelectionnees)
+
+
+		/// <summary>
+		/// Détermine laquelle des valeurs selectionnee en fonction du nombre de contrainte voisinnes en utilisant Degree heuristic (on retourne celle qui a le plus de contraintes(cases voisines avec degré 1)
+		/// </summary>
+		/// <param name="csp">CSP Courant</param>
+		/// <param name="casesSelectionnees">Tableau contenant les cases retenue après application de MRV</param>
+		/// <returns>La meilleure case possible</returns>
+		private Tuple<int, int> DegreeHeuristic(Dictionary<Tuple<int, int>, List<int>> csp, List<Tuple<int, int>> casesSelectionnees)
 		{
 
 			if (casesSelectionnees.Count == 1) {
@@ -186,14 +183,15 @@ namespace SudokuSolver
 
 			return caseDegreMax;
 		}
-        
-        /// <summary>
-        /// On trie les valeurs possibles d'une case en fonction du nombre de contraintes qu'impose la valeur (l'impact qu'a la valeur sur ses voisins). La moins contraignante est en début de liste.
-        /// </summary>
-        /// <param name="csp">CSP Courant</param>
-        /// <param name="caseSelec">case sélectionnée pour évaluation</param>
-        /// <returns>Une liste ordonnée par impact de la valeur sur les voisins de la case évaluée</returns>
-        private List<int> OrderDomainValues(Dictionary<Tuple<int, int>, List<int>> csp, Tuple<int, int> caseSelec)
+
+
+		/// <summary>
+		/// On trie les valeurs possibles d'une case en fonction du nombre de contraintes qu'impose la valeur (l'impact qu'a la valeur sur ses voisins). La moins contraignante est en début de liste.
+		/// </summary>
+		/// <param name="csp">CSP Courant</param>
+		/// <param name="caseSelec">case sélectionnée pour évaluation</param>
+		/// <returns>Une liste ordonnée par impact de la valeur sur les voisins de la case évaluée</returns>
+		private List<int> OrderDomainValues(Dictionary<Tuple<int, int>, List<int>> csp, Tuple<int, int> caseSelec)
 		{
 			// si il n'y a qu'une seule valeur dans le tableau retourne cette valeur
 			if (csp[caseSelec].Count == 1) {
@@ -222,13 +220,14 @@ namespace SudokuSolver
 			}
 			return valeursSelec;
 		}
-    
-        /// <summary>
-        /// Fait une copie du CSP 
-        /// </summary>
-        /// <param name="csp">CSP à copier</param>
-        /// <returns>copie du CSP</returns>
-        private Dictionary<Tuple<int, int>, List<int>> CopieCSP(Dictionary<Tuple<int, int>, List<int>> csp)
+
+
+		/// <summary>
+		/// Fait une copie du CSP 
+		/// </summary>
+		/// <param name="csp">CSP à copier</param>
+		/// <returns>copie du CSP</returns>
+		private Dictionary<Tuple<int, int>, List<int>> CopieCSP(Dictionary<Tuple<int, int>, List<int>> csp)
 		{
 			Dictionary<Tuple<int, int>, List<int>> copie = new Dictionary<Tuple<int, int>, List<int>>();
 
@@ -242,12 +241,13 @@ namespace SudokuSolver
 			return copie;
 		}
 
-        /// <summary>
-        /// Détermine si la grille est résolue (il n'y a qu'une valeur possible pour chacune des cases).
-        /// </summary>
-        /// <param name="csp">CSP à évaluer </param>
-        /// <returns>Vrai si la grille est résolue, Faux sinon</returns>
-        private bool EstValide(Dictionary<Tuple<int, int>, List<int>> csp)
+
+		/// <summary>
+		/// Détermine si la grille est résolue (il n'y a qu'une valeur possible pour chacune des cases).
+		/// </summary>
+		/// <param name="csp">CSP à évaluer </param>
+		/// <returns>Vrai si la grille est résolue, Faux sinon</returns>
+		private bool EstValide(Dictionary<Tuple<int, int>, List<int>> csp)
 		{
 			List<int> valeursPossibles;
 			foreach (KeyValuePair<Tuple<int, int>, List<int>> caseSudoku in csp) {
@@ -259,17 +259,17 @@ namespace SudokuSolver
 			return true;
 		}
 
-        /// <summary>
-        /// Détermine si le changement est possible, soit si on ne réduit pas le domaine d'un voisin à un ensemble vide.
-        /// </summary>
-        /// <param name="cspModif">CSP courant</param>
-        /// <param name="caseSelec">Case courante</param>
-        /// <param name="valeur">Valeur à tester pour la case caseSelec</param>
-        /// <returns>Vrai si le changement est possible, Faux sinon</returns>
-        private Boolean Consistent(Dictionary<Tuple<int, int>, List<int>> cspModif, Tuple<int, int> caseSelec, int valeur)
+
+		/// <summary>
+		/// Détermine si le changement est possible, soit si on ne réduit pas le domaine d'un voisin à un ensemble vide.
+		/// </summary>
+		/// <param name="cspModif">CSP courant</param>
+		/// <param name="caseSelec">Case courante</param>
+		/// <param name="valeur">Valeur à tester pour la case caseSelec</param>
+		/// <returns>Vrai si le changement est possible, Faux sinon</returns>
+		private bool Consistent(Dictionary<Tuple<int, int>, List<int>> cspModif, Tuple<int, int> caseSelec, int valeur)
 		{
-			List<int> domaineMaj = new List<int>();
-			domaineMaj.Add(valeur);
+			List<int> domaineMaj = new List<int> { valeur };
 			cspModif[caseSelec] = domaineMaj;
 			List<Tuple<int, int>> keys = new List<Tuple<int, int>>(cspModif.Keys);
 			foreach (Tuple<int, int> caseSudokuKey in keys) {
@@ -293,13 +293,13 @@ namespace SudokuSolver
 			return true;
 		}
 
-        /// <summary>
-        /// Initialise le csp avec l'algorithme AC3
-        /// </summary>
-        /// <param name="csp">CSP de départ</param>
-        /// <returns>Faux si la grille est impossible à résoudre, Vrai sinon</returns>
 
-        private bool AC3(Dictionary<Tuple<int, int>, List<int>> csp)
+		/// <summary>
+		/// Initialise le csp avec l'algorithme AC3
+		/// </summary>
+		/// <param name="csp">CSP de départ</param>
+		/// <returns>Faux si la grille est impossible à résoudre, Vrai sinon</returns>
+		private bool AC3(Dictionary<Tuple<int, int>, List<int>> csp)
 		{
 			// Liste d'arcs Case X / Case Y
 			LinkedList<Tuple<Tuple<int, int>, Tuple<int, int>>> queue = new LinkedList<Tuple<Tuple<int, int>, Tuple<int, int>>>();
@@ -311,9 +311,10 @@ namespace SudokuSolver
 					}
 				}
 			}
+
 			Tuple<Tuple<int, int>, Tuple<int, int>> arc;
 			while (!(queue.Count == 0)) {
-				arc = queue.First.Value;//  supprime et recupere la premiere valeur de la liste
+				arc = queue.First.Value; // supprime et recupere la premiere valeur de la liste
 				queue.RemoveFirst();
 				if (RemoveInconsistentValues(csp, arc)) {
 					if (csp[arc.Item1].Count == 0) {
@@ -330,13 +331,14 @@ namespace SudokuSolver
 			return true;
 		}
 
-        /// <summary>
-        /// Enlève les valeurs d'un domaine si elles ne respectent pas les contraintes
-        /// </summary>
-        /// <param name="csp">CSP Courant</param>
-        /// <param name="arc">Arc reliant une case x et y </param>
-        /// <returns> vrai si on a enlevé une ou plusieurs valeurs.</returns>
-        private bool RemoveInconsistentValues(Dictionary<Tuple<int, int>, List<int>> csp, Tuple<Tuple<int, int>, Tuple<int, int>> arc)
+
+		/// <summary>
+		/// Enlève les valeurs d'un domaine si elles ne respectent pas les contraintes
+		/// </summary>
+		/// <param name="csp">CSP Courant</param>
+		/// <param name="arc">Arc reliant une case x et y </param>
+		/// <returns> vrai si on a enlevé une ou plusieurs valeurs.</returns>
+		private bool RemoveInconsistentValues(Dictionary<Tuple<int, int>, List<int>> csp, Tuple<Tuple<int, int>, Tuple<int, int>> arc)
 		{
 			bool effacer = false;
 			List<int> valeursX = csp[arc.Item1];
@@ -354,36 +356,36 @@ namespace SudokuSolver
 				effacer = true;
 			}
 
-
 			return effacer;
 		}
 
-        /// <summary>
-        /// Détermine si la case courante est dans la meme ligne, colonne ou carré que la case selectionnée
-        /// </summary>
-        /// <param name="caseSelec">Case selectionnée</param>
-        /// <param name="caseCourante">Case courante</param>
-        /// <returns>Vrai si la case selectionnée est voisine de la case courante</returns>
-        private Boolean EstVoisin(Tuple<int, int> caseSelec, Tuple<int, int> caseCourante)
+
+		/// <summary>
+		/// Détermine si la case courante est dans la meme ligne, colonne ou carré que la case selectionnée
+		/// </summary>
+		/// <param name="caseSelec">Case selectionnée</param>
+		/// <param name="caseCourante">Case courante</param>
+		/// <returns>Vrai si la case selectionnée est voisine de la case courante</returns>
+		private bool EstVoisin(Tuple<int, int> caseSelec, Tuple<int, int> caseCourante)
 		{
 			int ligne = caseCourante.Item1;
 			int col = caseCourante.Item2;
 
-            // Si le sudoku est de taille n²xn², la grille est divisé en blocks carrés
-            if(Math.Sqrt(taille)%1 ==0 ){
-                // trouver les coordonnées du carré auquel la case selectionnée appartient
-			    int ligneDebutCarre = caseSelec.Item1 / (int) Math.Sqrt(taille);
-			    int colDebutCarre = caseSelec.Item2 / (int) Math.Sqrt(taille);
+			// Si le sudoku est de taille n²xn², la grille est divisé en blocks carrés
+			double sizeSq = Math.Sqrt(taille);
+			if (sizeSq % 1 == 0) { // si la racine est entiere
+								   // trouver les coordonnées du carré auquel la case selectionnée appartient
+				int ligneDebutCarre = caseSelec.Item1 / (int)sizeSq * (int)sizeSq;
+				int colDebutCarre = caseSelec.Item2 / (int)sizeSq * (int)sizeSq;
 
-			    return (!((ligne == caseSelec.Item1) && (col == caseSelec.Item2)) &&
-			    ((ligne == caseSelec.Item1) || (col == caseSelec.Item2) ||
-			    (ligne >= ligneDebutCarre && ligne <= ligneDebutCarre + 2 && col >= colDebutCarre && col <= colDebutCarre + 2)));
-            }
-            else
-            {
-                return false;
-            }
-			
+				return (!((ligne == caseSelec.Item1) && (col == caseSelec.Item2)) &&
+				((ligne == caseSelec.Item1) || (col == caseSelec.Item2) ||
+				(ligne >= ligneDebutCarre && ligne <= ligneDebutCarre + 2 && col >= colDebutCarre && col <= colDebutCarre + 2)));
+			} else {
+				return false;
+			}
+
 		}
+
 	}
 }
