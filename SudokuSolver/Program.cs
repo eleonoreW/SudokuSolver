@@ -9,8 +9,7 @@ namespace SudokuSolver
 		static void Main(string[] args)
 		{
 			// Recuperation des lignes du fichier d'entree
-			string[] inputLines = File.ReadAllLines("../../Input.txt"); // Chemin temporaire pour debug => | bin\Debug\SudokuSolver.exe
-																		//                                 | Input.txt
+			string[] inputLines = File.ReadAllLines("Input.txt");
 
 			// Taille de la grille à la ligne 0
 			int gridSize = int.Parse(inputLines[0]);
